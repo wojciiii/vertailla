@@ -32,6 +32,7 @@ with open(temp_file, "r+b") as f:
     #    mm = mmap.mmap(f.fileno(), 0)
     #    print(mm.find('\x00\x09\x03\x03'))
 
+    # TODO: output a hexdump of the bin file decorated with sections that match the offsets in the bin file.
     segments_of_interrest = []
     with open(sys.argv[1], 'rb') as elffile:
         for segment in ELFFile(elffile).iter_segments():
