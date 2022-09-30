@@ -15,6 +15,7 @@ class Image:
     def __init__(self):
         self.payload = []
         self.base_addr = 0
+        self.max_addr = 0
 
     def load(self, path):
         """Load an image from a given file"""
@@ -24,6 +25,7 @@ class Image:
                 ih = IntelHex(path)
                 self.payload = ih.tobinarray()
                 self.base_addr = ih.minaddr()
+                self.max_addr = ih.maxaddr()
             else:
                 with open(path, 'rb') as f:
                     self.payload = f.read()
@@ -32,6 +34,9 @@ class Image:
 
     def get_base_address(self):
         return self.base_addr
+
+    def get_max_address(self):
+        return self.max_addr
 
     def save(self, path):
         """Save an image from a given file"""
