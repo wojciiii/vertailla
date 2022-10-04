@@ -8,6 +8,7 @@ import mmap
 from image import Image
 import tempfile
 import argparse
+from os.path import basename
 
 parser = argparse.ArgumentParser(description='verta: decorated hexdump.')
 parser.add_argument('--elf', action='append', nargs='+', required=True, help='input, ELF files')
@@ -73,6 +74,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
     with open(temp_file, "r+b") as f:
         mm = mmap.mmap(f.fileno(), 0)
 
+        file_count = 0
         for input_elf in input_elf_files:
             segments_of_interrest = []
             with open(input_elf, 'rb') as elffile:
@@ -110,6 +112,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
                                     {
                                         "name": section.name,
                                         "address": section_address,
+                                        #"segment_id": "file: %d, id: %d, file: %s" % (file_count, count, basename(input_elf)),
                                         "segment_id": count,
                                         "found_offset": found_offset,
                                         "data_found": data_found,
@@ -117,6 +120,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
                                     }
                                 )
                             count += 1
+                file_count += 1
 
     original_stdout = sys.stdout
     if args.output != "-":
@@ -138,6 +142,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
             for si in section_infos:
                 if range_start <= si['address'] < range_end:
                     decoration = f" Section: {si['name']} ({hex(si['address'])})"
+                    #decoration = f" Section: {si['name']} ({hex(si['address'])}) ({si['segment_id']})"
 
             if start_address > elf_max_address:
                 break
