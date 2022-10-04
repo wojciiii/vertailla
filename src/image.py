@@ -49,4 +49,3 @@ class Image:
         else:
             with open(path, 'wb') as f:
                 f.write(self.payload)
-
