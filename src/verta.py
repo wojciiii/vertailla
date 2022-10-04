@@ -10,9 +10,11 @@ import tempfile
 import argparse
 
 parser = argparse.ArgumentParser(description='verta: decorated hexdump.')
-parser.add_argument('--elf', action='append', nargs='+', help='input, ELF files')
-parser.add_argument('--hex', action='append', nargs='+', help='input, HEX file')
-parser.add_argument('--output', help='output, file to write output to')
+parser.add_argument('--elf', action='append', nargs='+', required=True, help='input, ELF files')
+parser.add_argument('--hex', action='append', nargs='+', required=True, help='input, HEX file')
+parser.add_argument('--output', default='-',
+                    help='output, file to write output to, default -')
+
 parser.add_argument('--short', '-s', action='store_true', help='short output')
 parser.add_argument('--verbose', '-v', action='store_true', help='verbose flag')
 
@@ -62,7 +64,8 @@ with tempfile.TemporaryDirectory() as temp_dir:
     i.save(temp_file)
 
     if args.verbose:
-        print(f"Loaded file {input_hex} with base address {hex(elf_base_address)} and max address {hex(elf_max_address)}")
+        print(f"Loaded file {input_hex} with base address {hex(elf_base_address)} and max address \
+              {hex(elf_max_address)}")
 
     section_infos = []
     segment_infos = []
@@ -115,6 +118,11 @@ with tempfile.TemporaryDirectory() as temp_dir:
                                 )
                             count += 1
 
+    original_stdout = sys.stdout
+    if args.output != "-":
+        output = open(args.output, 'w')
+        sys.stdout = output
+
     # Write a hexdump of the bin file:
     with open(temp_file, "r+b") as f:
         it = iter(functools.partial(f.read, 16), '')
@@ -138,5 +146,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
                     print(f'{start_address:07x} {b.hex(" ", 2)}{decoration}')
             else:
                 print(f'{start_address:07x} {b.hex(" ", 2)}{decoration}')
-
+    sys.stdout = original_stdout
+    if args.output != "-":
+        output.close()
 sys.exit(0)
